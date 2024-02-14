@@ -109,11 +109,10 @@ float DHT::readTemperature(bool S, bool force) {
       break;
     case DHT22:
     case DHT21:
-      f = ((word)(data[2] & 0x7F)) << 8 | data[3];
-      f *= 0.1;
-      if (data[2] & 0x80) {
-        f *= -1;
-      }
+      int16_t temp16 = data[2] << 8  | data[3]; // case 1 : signed 16 bits
+      if ((data[2] & 0xF0) == 0x80)             // case 2 : negative when high nibble = 0x80
+        temp16 = -(0xFFF & temp16);
+      f = 0.1f * temp16;
       if (S) {
         f = convertCtoF(f);
       }
